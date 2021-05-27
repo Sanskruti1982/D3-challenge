@@ -1,11 +1,11 @@
-var svgWidth = 960;
+var svgWidth = 1100;
 var svgHeight = 600;
 
 var margin = {
   top: 20,
-  right: 40,
+  right: 20,
   bottom: 80,
-  left: 100
+  left: 80
 };
 
 var width = svgWidth - margin.left - margin.right;
@@ -40,6 +40,7 @@ function xScale(healthData, chosenXAxis) {
   return xLinearScale;
 
 }
+// function used for updating y-scale var upon click on axis label
 function yScale(healthData, chosenYAxis) {
   // create scales
   var yLinearScale = d3.scaleLinear()
@@ -62,7 +63,7 @@ function renderXAxes(newXScale, xAxis) {
 
   return xAxis;
 }
-
+// function used for updating yAxis var upon click on axis label
 function renderYAxes(newYScale, yAxis) {
   var leftAxis = d3.axisLeft(newYScale);
 
@@ -92,7 +93,8 @@ function renderYCircles(circlesGroup, newYScale, chosenYAxis) {
 
   return circlesGroup;
 }
-
+// function used for updating circles text with a transition to
+// new circles
 function renderXText(circlesGroup, newXScale, chosenXAxis) {
 
   circlesGroup.transition()
@@ -138,18 +140,18 @@ function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
   }
 
 
-
+  // getting the tooltip set up
   var toolTip = d3.tip()
-    //.attr("class", "tooltip")
-    //.offset([80, -60])
+    .attr("class", "tooltip")
+    .offset([80, -60])
     .html(function(d) {
       return (`${d.state}<br>${xlabel} ${d[chosenXAxis]}%<br>${ylabel} ${d[chosenYAxis]}%`);
     });
 
-  circlesGroup.call(toolTip);
+  chartGroup.call(toolTip);
 
   circlesGroup.on("mouseover", function(data) {
-    toolTip.show(data)
+    toolTip.show(data, this)
     
   })
     // onmouseout event
@@ -201,6 +203,7 @@ d3.csv("assets/data/data.csv").then(function(healthData, err) {
     .enter()
     .append("g");
 
+  // append circles to add state text
   var circles = circlesGroup.append("circle")
     .attr("cx", d => xLinearScale(d[chosenXAxis]))
     .attr("cy", d => yLinearScale(d[chosenYAxis]))
@@ -239,7 +242,8 @@ d3.csv("assets/data/data.csv").then(function(healthData, err) {
     .classed("inactive", true)
     .text("Income");
 
-  // append y axis
+  // Create group for two x-axis labels
+
   var ylabelsGroup = chartGroup.append("g")
     .attr("transform", "rotate(-90)");
   
@@ -341,19 +345,19 @@ ylabelsGroup.selectAll("text")
   var value = d3.select(this).attr("value");
   if (value !== chosenYAxis) {
 
-    // replaces chosenXAxis with value
+    // replaces chosenYAxis with value
     chosenYAxis = value;
 
     // console.log(chosenYAxis)
 
     // functions here found above csv import
-    // updates x scale for new data
+    // updates y scale for new data
     yLinearScale = yScale(healthData, chosenYAxis);
 
-    // updates x axis with transition
+    // updates y axis with transition
     yAxis = renderYAxes(yLinearScale, yAxis);
 
-    // updates circles with new x values
+    // updates circles with new y values
     circles = renderYCircles(circles, yLinearScale, chosenYAxis);
 
     circlesText = renderYText(circlesText, yLinearScale, chosenYAxis);
